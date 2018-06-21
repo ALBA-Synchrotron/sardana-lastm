@@ -147,10 +147,6 @@ class RasPiTangoDOCallback(EventReceiver):
         elif type_.name == "passive":
             voltage = False
             pairs = [(attr_name, voltage)]
-            if self.axis == 3:
-                pairs.append(("Pin5_voltage", False))
-            elif self.axis == 5:
-                pairs.append(("Pin3_voltage", True))
         else:
             return
         self.device.write_attributes(pairs)
