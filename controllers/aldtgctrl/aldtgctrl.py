@@ -1,5 +1,4 @@
 import imp
-import time
 import threading
 
 import PyTango
