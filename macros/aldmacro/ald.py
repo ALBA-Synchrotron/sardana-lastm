@@ -1,0 +1,55 @@
+import time
+from sardana.macroserver.macro import Macro, Type
+
+__author__ = "zreszela@cells.es"
+__docformat__ = "restructuredtext"
+__all__ = ("ald_set_conf", "ald_get_conf", "ald_run")
+
+
+class ald_set_conf(Macro):
+    """Set path to ALD configuration file (must be accessible on the host
+    where MacroServer is running)."""
+
+    env = ("ALDTGCtrl",)
+
+    param_def = [["file", Type.Filename, "/home/operatorstm/ald_seq_conf.py",
+                  "Full path to configuration file"]]
+
+    def run(self, file_):
+        ctrl_name = self.getEnv("AldTgCtrl")
+        ctrl = self.getController(ctrl_name)
+        ctrl.getAttribute("ConfigurationFile").write(file_)
+
+
+class ald_get_conf(Macro):
+    """Get path to ALD configuration file"""
+
+    env = ("ALDTGCtrl",)
+
+    result_def = [["file", Type.Filename, None, "Full path to configuration "
+                                                "file"]]
+
+    def run(self, file_):
+        ctrl_name = self.getEnv("AldTgCtrl")
+        ctrl = self.getController(ctrl_name)
+        return ctrl.getAttribute("ConfigurationFile").read()
+
+
+class ald_run(Macro):
+    """Execute ALD according to configuration file set with ald_set_conf
+    macro"""
+
+    env = ("ALDMeasGrp",)
+
+    param_def = [["repeats", Type.Integer, 1, "Number of repetitions"],
+                 ["wait_time", Type.Float, 0, "Wait time (s) between "
+                                              "repetitions"]]
+
+    def run(self, repeats, wait_time):
+        meas_grp_name = self.getEnv("ALDMeasGrp")
+        meas_grp = self.getMeasurementGroup(meas_grp_name)
+        for i in xrange(repeats):
+            self.info("Running %d repetition" % i)
+            meas_grp.count(0.001)
+            time.sleep(wait_time)
+        self.info("Done")
