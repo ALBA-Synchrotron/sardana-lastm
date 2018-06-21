@@ -27,8 +27,6 @@ class RasPiDOCallback(EventReceiver):
         self.axis = axis
 
     def event_received(self, src, type_, value):
-        print "event_received(%s, %s, %s): %f" % (
-        src, type_, value, time.time())
         if type_.name == "active":
             voltage = True
         elif type_.name == "passive":
@@ -80,19 +78,16 @@ class ALDTGCtrl(TriggerGateController):
 
     def StateOne(self, axis):
         """Get the dummy trigger/gate state"""
-        try:
-            self._log.debug('StateOne(%d): entering...' % axis)
-            sta = State.On
-            status = "Stopped"
-            idx = axis - 1
-            tg = self.tg[idx]
-            if tg.is_running() or tg.is_started():
-                sta = State.Moving
-                status = "Moving"
-            self._log.debug('StateOne(%d): returning (%s, %s)' %
-                            (axis, sta, status))
-        except Exception, e:
-            print e
+        self._log.debug('StateOne(%d): entering...' % axis)
+        sta = State.On
+        status = "Stopped"
+        idx = axis - 1
+        tg = self.tg[idx]
+        if tg.is_running() or tg.is_started():
+            sta = State.Moving
+            status = "Moving"
+        self._log.debug('StateOne(%d): returning (%s, %s)' %
+                        (axis, sta, status))
         return sta, status
 
     def PreStartAll(self):
@@ -110,7 +105,6 @@ class ALDTGCtrl(TriggerGateController):
         self._log.debug('StartOne(%d): entering...' % axis)
         idx = axis - 1
         tg = self.tg[idx]
-        print tg._listeners
         tg.start()
         self.thread = threading.Thread(target=tg.run)
         self.thread.start()
@@ -131,8 +125,6 @@ class RasPiTangoDOCallback(EventReceiver):
         self.attr_name = "Pin%d_voltage" % axis
 
     def event_received(self, src, type_, value):
-        print "event_received(%s, %s, %s): %f" % (
-        src, type_, value, time.time())
         if type_.name == "active":
             voltage = True
         elif type_.name == "passive":
@@ -179,7 +171,7 @@ class ALDTangoTGCtrl(TriggerGateController):
         func_generator.add_listener(cb)
         self.tg[idx] = func_generator
         self.cbs[idx] = cb
-        self._log.debug('AddDevice(%d): leaving...' % axis)
+        self._log.debug("AddDevice(%d): leaving..." % axis)
 
     def SynchOne(self, axis, _):
         """Ignore configuration coming from Sardana and use configuration
@@ -197,19 +189,16 @@ class ALDTangoTGCtrl(TriggerGateController):
 
     def StateOne(self, axis):
         """Get the dummy trigger/gate state"""
-        try:
-            self._log.debug('StateOne(%d): entering...' % axis)
-            sta = State.On
-            status = "Stopped"
-            idx = axis - 1
-            tg = self.tg[idx]
-            if tg.is_running() or tg.is_started():
-                sta = State.Moving
-                status = "Moving"
-            self._log.debug('StateOne(%d): returning (%s, %s)' %
-                            (axis, sta, status))
-        except Exception, e:
-            print e
+        self._log.debug("StateOne(%d): entering..." % axis)
+        sta = State.On
+        status = "Stopped"
+        idx = axis - 1
+        tg = self.tg[idx]
+        if tg.is_running() or tg.is_started():
+            sta = State.Moving
+            status = "Moving"
+        self._log.debug("StateOne(%d): returning (%s, %s)" %
+                        (axis, sta, status))
         return sta, status
 
     def PreStartAll(self):
@@ -224,10 +213,9 @@ class ALDTangoTGCtrl(TriggerGateController):
     def StartOne(self, axis):
         """Start the specified trigger
         """
-        self._log.debug('StartOne(%d): entering...' % axis)
+        self._log.debug("StartOne(%d): entering..." % axis)
         idx = axis - 1
         tg = self.tg[idx]
-        print tg._listeners
         tg.start()
         self.thread = threading.Thread(target=tg.run)
         self.thread.start()
@@ -235,6 +223,6 @@ class ALDTangoTGCtrl(TriggerGateController):
     def AbortOne(self, axis):
         """Start the specified trigger
         """
-        self._log.debug('AbortOne(%d): entering...' % axis)
+        self._log.debug("AbortOne(%d): entering..." % axis)
         idx = axis - 1
         self.tg[idx].stop()
