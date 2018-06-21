@@ -18,6 +18,17 @@ __docformat__ = "restructuredtext"
 __all__ = ("ALDTGCtrl", "ALDTangoTGCtrl")
 
 
+axis2valve = {
+    3: "valve1",
+    5: "valve2",
+    7: "valve3",
+    11: "valve4",
+    12: "valve5",
+    13: "valve6",
+    15: "valve7",
+    16: "valve8"
+}
+
 class RasPiDOCallback(EventReceiver):
 
     def __init__(self, device, axis):
@@ -122,16 +133,27 @@ class RasPiTangoDOCallback(EventReceiver):
     def __init__(self, device, axis):
         EventReceiver.__init__(self)
         self.device = device
-        self.attr_name = "Pin%d_voltage" % axis
+        self.axis = axis
 
     def event_received(self, src, type_, value):
+        attr_name = "Pin%d_voltage" % self.axis
         if type_.name == "active":
             voltage = True
+            pairs = [(attr_name, voltage)]
+            if self.axis == 3:
+                pairs.append(("Pin5_voltage", False))
+            elif self.axis == 5:
+                pairs.append(("Pin3_voltage", True))
         elif type_.name == "passive":
             voltage = False
+            pairs = [(attr_name, voltage)]
+            if self.axis == 3:
+                pairs.append(("Pin5_voltage", False))
+            elif self.axis == 5:
+                pairs.append(("Pin3_voltage", True))
         else:
             return
-        self.device.write_attribute(self.attr_name, voltage)
+        self.device.write_attributes(pairs)
 
 
 class ALDTangoTGCtrl(TriggerGateController):
@@ -183,7 +205,8 @@ class ALDTangoTGCtrl(TriggerGateController):
             raise RuntimeError("controller's ConfigurationFile is not set")
         ald_sequence_config = imp.load_source("ald_sequence_config",
                                               self._configurationfile)
-        conf = getattr(ald_sequence_config, "valve%d_conf" % axis)
+        valve = axis2valve[axis]
+        conf = getattr(ald_sequence_config, "%s_conf" % valve)
         tg.set_configuration(conf)
         self.conf[idx] = conf
 
