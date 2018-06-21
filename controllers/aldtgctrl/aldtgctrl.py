@@ -1,3 +1,4 @@
+import imp
 import time
 import threading
 
@@ -7,7 +8,8 @@ from raspberry_pi.RPi import Raspberry
 from sardana import State
 from sardana.sardanaevent import EventReceiver
 from sardana.util.funcgenerator import FunctionGenerator
-from sardana.pool.controller import TriggerGateController, Type, Description
+from sardana.pool.controller import TriggerGateController, Type, \
+    Description, Access, DataAccess
 from sardana.pool.pooldefs import SynchDomain
 
 
@@ -151,6 +153,14 @@ class ALDTangoTGCtrl(TriggerGateController):
                    Description: "Raspberry PI device"}
     }
 
+    ctrl_attributes = {
+        "ConfigurationFile": {
+                Type: str,
+                Description: "Full path to configuration file",
+                Access: DataAccess.ReadWrite,
+        },
+    }
+
     def __init__(self, inst, props, *args, **kwargs):
         """Constructor"""
         TriggerGateController.__init__(self, inst, props, *args, **kwargs)
@@ -171,9 +181,17 @@ class ALDTangoTGCtrl(TriggerGateController):
         self.cbs[idx] = cb
         self._log.debug('AddDevice(%d): leaving...' % axis)
 
-    def SynchOne(self, axis, conf):
+    def SynchOne(self, axis, _):
+        """Ignore configuration coming from Sardana and use configuration
+        set by user in ConfigurationFile"""
         idx = axis - 1
         tg = self.tg[idx]
+        # due to sardana-org/sardana#787 use lowercase
+        if not hasattr(self, "_configurationfile"):
+            raise RuntimeError("controller's ConfigurationFile is not set")
+        ald_sequence_config = imp.load_source("ald_sequence_config",
+                                              self._configurationfile)
+        conf = getattr(ald_sequence_config, "valve%d_conf" % axis)
         tg.set_configuration(conf)
         self.conf[idx] = conf
 
