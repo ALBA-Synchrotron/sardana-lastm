@@ -1,4 +1,6 @@
 import time
+
+import tango
 from sardana.macroserver.macro import Macro, Type
 
 __author__ = "zreszela@cells.es"
@@ -67,3 +69,10 @@ class ald_init(Macro):
     def run(self):
         ctrl_name = self.getEnv("AldTgCtrl")
         ctrl = self.getController(ctrl_name)
+        axes = ctrl.getUsedAxes()
+        ctrl_proxy = ctrl.getDeviceProxy()
+        raspi_name = ctrl_proxy.get_property("device")["device"][0]
+        raspi_proxy = tango.DeviceProxy(raspi_name)
+        for axis in axes:
+            raspi_proxy.write_attribute("pin%d_output" % axis, True)
+
