@@ -53,3 +53,17 @@ class ald_run(Macro):
             meas_grp.count(0.001)
             time.sleep(wait_time)
         self.info("Done")
+
+
+class ald_init(Macro):
+    """Initialize ALD hardware.
+
+    This includes:
+    - set RPi GPIO output pins
+    """
+
+    env = ("ALDTGCtrl",)
+
+    def run(self):
+        ctrl_name = self.getEnv("AldTgCtrl")
+        ctrl = self.getController(ctrl_name)
