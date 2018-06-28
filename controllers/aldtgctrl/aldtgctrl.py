@@ -2,7 +2,6 @@ import imp
 import threading
 
 import PyTango
-from raspberry_pi.RPi import Raspberry
 
 from sardana import State
 from sardana.sardanaevent import EventReceiver
@@ -60,7 +59,7 @@ class ALDTGCtrl(TriggerGateController):
     def __init__(self, inst, props, *args, **kwargs):
         """Constructor"""
         TriggerGateController.__init__(self, inst, props, *args, **kwargs)
-        #        self.device = PyTango.DeviceProxy(self.Device)
+        from raspberry_pi.RPi import Raspberry
         self.device = Raspberry("raspi030")
         self.device.connect_to_pi()
         self.tg = {}
