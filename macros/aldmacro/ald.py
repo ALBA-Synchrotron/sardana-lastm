@@ -49,7 +49,8 @@ class ald_run(Macro):
 
     def run(self, repeats, wait_time):
         meas_grp_name = self.getEnv("ALDMeasGrp")
-        meas_grp = self.getMeasurementGroup(meas_grp_name)
+        meas_grp = self.getObj(
+            meas_grp_name, type_class=Type.MeasurementGroup)
         for i in xrange(repeats):
             self.info("Running %d repetition" % i)
             meas_grp.count(0.001)
