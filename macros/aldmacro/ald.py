@@ -31,10 +31,10 @@ class ald_get_conf(Macro):
     result_def = [["file", Type.Filename, None, "Full path to configuration "
                                                 "file"]]
 
-    def run(self, file_):
+    def run(self):
         ctrl_name = self.getEnv("ALDTGCtrl")
         ctrl = self.getController(ctrl_name)
-        return ctrl.getAttribute("ConfigurationFile").read()
+        return ctrl.getAttribute("ConfigurationFile").read().value
 
 
 class ald_run(Macro):
