@@ -209,7 +209,13 @@ class ALDTangoTGCtrl(TriggerGateController):
         ald_sequence_config = imp.load_source("ald_sequence_config",
                                               self._configurationfile)
         valve = axis2valve[axis]
-        conf = getattr(ald_sequence_config, "%s_conf" % valve)
+        try:
+            attr_name = "%s_conf" % valve
+            conf = getattr(ald_sequence_config, attr_name)
+        except AttributeError:
+            msg = "%s is missing in configuration file %s" % (attr_name,
+                  self._configurationfile)
+            raise RuntimeError(msg)
         tg.set_configuration(conf)
         self.conf[idx] = conf
 
