@@ -1,4 +1,5 @@
 import imp
+import sys
 import threading
 
 import PyTango
@@ -197,6 +198,10 @@ class ALDTangoTGCtrl(TriggerGateController):
         # due to sardana-org/sardana#787 use lowercase
         if not hasattr(self, "_configurationfile"):
             raise RuntimeError("controller's ConfigurationFile is not set")
+        # remove configuration module from sys.modules in order to
+        # ensure a correct reload
+        if "ald_sequence_config" in sys.modules:
+            sys.modules.pop("ald_sequence_config")
         ald_sequence_config = imp.load_source("ald_sequence_config",
                                               self._configurationfile)
         valve = axis2valve[axis]
