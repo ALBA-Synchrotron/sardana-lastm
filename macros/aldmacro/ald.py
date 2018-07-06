@@ -51,8 +51,10 @@ class ald_run(Macro):
         meas_grp_name = self.getEnv("ALDMeasGrp")
         meas_grp = self.getObj(
             meas_grp_name, type_class=Type.MeasurementGroup)
+        conf_file = self.execMacro("ald_get_conf").getResult()
+        self.info("Configuration: %s" % conf_file)
         for i in xrange(repeats):
-            self.info("Running %d repetition" % i)
+            self.info("Running %d repetition" % (i + 1))
             meas_grp.count(0.001)
             time.sleep(wait_time)
         self.info("Done")
@@ -75,5 +77,6 @@ class ald_init(Macro):
         raspi_name = ctrl_proxy.get_property("device")["device"][0]
         raspi_proxy = tango.DeviceProxy(raspi_name)
         for axis in axes:
+            self.output("Setting PIN %d to output" % axis)
             raspi_proxy.write_attribute("pin%d_output" % axis, True)
 
