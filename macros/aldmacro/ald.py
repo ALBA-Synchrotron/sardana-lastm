@@ -79,7 +79,4 @@ class ald_init(Macro):
         for axis in axes:
             self.output("Setting PIN %d to output" % axis)
             raspi_proxy.write_attribute("pin%d_output" % axis, True)
-            # add extra wait time, otherwise the only the first pin
-            # reacts on the request
-            time.sleep(.1)
 
