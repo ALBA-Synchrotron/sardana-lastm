@@ -1,0 +1,21 @@
+<taurusgui_config>
+  <GUI_NAME>ald_gui</GUI_NAME>
+  <ORGANIZATION>ALBA</ORGANIZATION>
+  <CUSTOM_LOGO/>
+  <MACROSERVER_NAME>MacroServer/ald/1</MACROSERVER_NAME>
+  <DOOR_NAME>Door/ald/1</DOOR_NAME>
+  <INSTRUMENTS_FROM_POOL>False</INSTRUMENTS_FROM_POOL>
+  <PanelDescriptions>
+    <PanelDescription>
+  <name>valves-output</name>
+  <classname>TaurusForm</classname>
+  <modulename/>
+  <widgetname/>
+  <floating>True</floating>
+  <sharedDataWrite/>
+  <sharedDataRead/>
+  <model>tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin3_output, tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin5_output, tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin7_output, tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin11_output, tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin12_output, tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin13_output, tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin15_output, tango://ilastm01.cells.es:10000/ald/io/raspberrypiio-01/pin16_output</model>
+</PanelDescription>
+  </PanelDescriptions>
+  <MONITOR></MONITOR>
+</taurusgui_config>
