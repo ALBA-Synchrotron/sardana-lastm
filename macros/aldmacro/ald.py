@@ -51,13 +51,38 @@ class ald_run(Macro):
         meas_grp_name = self.getEnv("ALDMeasGrp")
         meas_grp = self.getObj(
             meas_grp_name, type_class=Type.MeasurementGroup)
+        elements = meas_grp.ElementList
+        tgs = []
+        for elem in elements:
+            obj = self.getObj(elem, type_class=Type.TriggerGate)
+            if obj is not None:
+                tgs.append(obj)
         conf_file = self.execMacro("ald_get_conf").getResult()
         self.info("Configuration: %s" % conf_file)
+        alarm = False
         for i in xrange(repeats):
             self.info("Running %d repetition" % (i + 1))
             meas_grp.count(0.001)
             time.sleep(wait_time)
-        self.info("Done")
+            for tg in tgs:
+                if tg.State() != tango.DevState.ON:
+                    alarm = True
+                    break
+            if alarm:
+                break
+        if alarm:
+            for tg in tgs:
+                name = tg.name
+                state = tg.State()
+                status = tg.Status()
+                if state != tango.DevState.ON:
+                    log = self.warning
+                else:
+                    log = self.output
+                log("{0} state: {1}; status: {2}".format(name, state, status))
+            raise RuntimeError("ald sequence failed")
+        else:
+            self.info("Done")
 
 
 class ald_init(Macro):
