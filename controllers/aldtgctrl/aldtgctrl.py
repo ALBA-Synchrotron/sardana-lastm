@@ -129,9 +129,9 @@ class ALDTGCtrl(TriggerGateController):
 
 class RasPiTangoDOCallback(EventReceiver):
 
-    def __init__(self, device, axis):
+    def __init__(self, ctrl, axis):
         EventReceiver.__init__(self)
-        self.device = device
+        self.ctrl = ctrl
         self.axis = axis
 
     def event_received(self, src, type_, value):
@@ -152,7 +152,24 @@ class RasPiTangoDOCallback(EventReceiver):
                 pairs = [(attr_name, voltage)]
         else:
             return
-        self.device.write_attributes(pairs)
+        try:
+            self.ctrl.device.write_attributes(pairs)
+        except Exception, e:
+            self.ctrl._log.error("Exception while handling callback:", exc_info=True)
+            self.ctrl._log.debug("Stopping generation...")
+            idx = self.axis - 1
+            self.ctrl.tg[idx].stop()
+            self.ctrl.state[idx] = State.Alarm
+            status = "Setting "
+            attr, voltage = pairs[0]
+            status += "{0} to {1}".format(attr, voltage)
+            try:
+                attr, voltage = pairs[1]
+                status += " and {0} to {1}".format(attr, voltage)
+            except IndexError:
+                pass
+            status += " failed. Check Pool logs for more details."
+            self.ctrl.status[idx] = status
 
 
 class ALDTangoTGCtrl(TriggerGateController):
@@ -180,6 +197,8 @@ class ALDTangoTGCtrl(TriggerGateController):
         self.device = PyTango.DeviceProxy(self.Device)
         self.tg = {}
         self.cbs = {}
+        self.state = {}
+        self.status = {}
         self.conf = {}
 
     def AddDevice(self, axis):
@@ -188,10 +207,12 @@ class ALDTangoTGCtrl(TriggerGateController):
         func_generator = FunctionGenerator()
         func_generator.initial_domain = SynchDomain.Time
         func_generator.active_domain = SynchDomain.Time
-        cb = RasPiTangoDOCallback(self.device, axis)
+        cb = RasPiTangoDOCallback(self, axis)
         func_generator.add_listener(cb)
         self.tg[idx] = func_generator
         self.cbs[idx] = cb
+        self.state[idx] = State.On
+        self.status[idx] = "Stopped"
         self._log.debug("AddDevice(%d): leaving..." % axis)
 
     def SynchOne(self, axis, _):
@@ -222,9 +243,9 @@ class ALDTangoTGCtrl(TriggerGateController):
     def StateOne(self, axis):
         """Get the dummy trigger/gate state"""
         self._log.debug("StateOne(%d): entering..." % axis)
-        sta = State.On
-        status = "Stopped"
         idx = axis - 1
+        sta = self.state[idx]
+        status = self.status[idx]
         tg = self.tg[idx]
         if tg.is_running() or tg.is_started():
             sta = State.Moving
@@ -240,6 +261,9 @@ class ALDTangoTGCtrl(TriggerGateController):
         pass
 
     def PreStartOne(self, axis, value=None):
+        idx = axis - 1
+        self.state[idx] = State.On
+        self.status[idx] = "Stopped"
         return True
 
     def StartOne(self, axis):
